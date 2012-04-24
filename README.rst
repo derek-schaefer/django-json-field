@@ -3,7 +3,7 @@ Django JSON Field
 
 ``django-json-field`` contains a flexible JSONField and associated form field. The model field is not only capable of serializing common JSON data types (int, float, decimal, string, time, date, datetime, etc.) but also lazily deserializing them so they can be accessed and modified as normal Python objects within Django.
 
-A form field is also provided. It will accept serialized representations (i.e. ``{"date": "2012-04-23T19:16:54.133", "num": "1.2399999999999999911182158029987476766109466552734375"}``) but also provides safe access to the ``datetime`` module and ``Decimal`` class for explicit use (i.e. ``{"date": datetime.datetime(2012, 4, 23, 19, 16, 54, 133000), "num": Decimal('1.2399999999999999911182158029987476766109466552734375')}``).
+A form field is also provided. It will accept serialized representations (i.e. ``{"date": "2012-04-23T19:16:54.133", "num": "1.2399"}``) but also provides safe access to the ``datetime`` module and ``Decimal`` class for explicit use (i.e. ``{"date": datetime.datetime(2012, 4, 23, 19, 16, 54, 133000), "num": Decimal('1.2399')}``).
 
 While the JSON string will not be deserialized until it is accessed it can still be a performance concern. You may find it valuable to disable deserialization (``JSONField(decoder=None)``), or to defer loading the field altogether (i.e. ``MyModel.objects.all().defer('json')``).
 
@@ -56,7 +56,7 @@ Add a ``JSONField`` to your model like any other field.
  - ``default``: Falls back on ``{}`` if not provided.
  - ``db_type``: Allows you to specify the column type (default: ``text``)
  - ``encoder``: Custom JSON encoder (default: ``DjangoJSONEncoder``)
- - ``decoder``: Custom JSON decoder (default: ``json_fields.fields.JSONDecoder``)
+ - ``decoder``: Custom JSON decoder (default: ``json_field.fields.JSONDecoder``)
  - ``encoder_kwargs``: Specify all arguments to the encoder (overrides ``encoder``)
  - ``decoder_kwargs``: Specify all arguments to the decoder (overrides ``decoder``)
 
