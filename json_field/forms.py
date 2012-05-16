@@ -14,14 +14,17 @@ class JSONFormField(fields.Field):
     def clean(self, value):
         # Have to jump through a few hoops to make this reliable
         value = super(JSONFormField, self).clean(value)
-        json_globals = {
+        json_globals = { # safety first!
             '__builtins__': None,
             'datetime': datetime,
             'Decimal': decimal.Decimal,
         }
-        value = json.dumps(eval(value, json_globals, {}), **self.encoder_kwargs)
+        try:
+            value = json.dumps(eval(value, json_globals, {}), **self.encoder_kwargs)
+        except Exception: # eval can throw many different errors
+            raise util.ValidationError(self.help_text) # throw the original error?
         try:
             json.loads(value, **self.decoder_kwargs)
-        except ValueError, e:
+        except ValueError:
             raise util.ValidationError(self.help_text)
         return value
