@@ -102,9 +102,6 @@ class JSONField(models.TextField):
     def value_to_string(self, obj):
         return self.get_db_prep_value(self._get_val_from_obj(obj))
 
-    def value_from_object(self, obj):
-        return json.dumps(super(JSONField, self).value_from_object(obj), **self.encoder_kwargs)
-
     def formfield(self, **kwargs):
         defaults = {
             'form_class': kwargs.get('form_class', JSONFormField),
@@ -113,6 +110,18 @@ class JSONField(models.TextField):
         }
         defaults.update(kwargs)
         return super(JSONField, self).formfield(**defaults)
+
+    def contribute_to_class(self, cls, name):
+        self.class_name = cls
+        super(JSONField, self).contribute_to_class(cls, name)
+
+        def get_json(model_instance):
+            return self.get_db_prep_value(getattr(model_instance, self.attname, None))
+        setattr(cls, 'get_%s_json' % self.name, get_json)
+
+        def set_json(model_instance, value):
+            return setattr(model_instance, self.attname, self.to_python(value))
+        setattr(cls, 'set_%s_json' % self.name, set_json)
 
 try:
     # add support for South migrations
