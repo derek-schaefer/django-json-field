@@ -102,9 +102,6 @@ class JSONField(models.TextField):
     def value_to_string(self, obj):
         return self.get_db_prep_value(self._get_val_from_obj(obj))
 
-    def value_from_object(self, obj):
-        return json.dumps(super(JSONField, self).value_from_object(obj), **self.encoder_kwargs)
-
     def formfield(self, **kwargs):
         defaults = {
             'form_class': kwargs.get('form_class', JSONFormField),
