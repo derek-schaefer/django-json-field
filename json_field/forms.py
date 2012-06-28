@@ -14,6 +14,11 @@ class JSONFormField(fields.Field):
     def clean(self, value):
         # Have to jump through a few hoops to make this reliable
         value = super(JSONFormField, self).clean(value)
+
+        ## Got to get rid of newlines for validation to work
+        # Data newlines are escaped so this is safe
+        value = value.replace('\r', '').replace('\n', '')
+
         json_globals = { # safety first!
             '__builtins__': None,
             'datetime': datetime,
@@ -21,10 +26,10 @@ class JSONFormField(fields.Field):
         }
         try:
             value = json.dumps(eval(value, json_globals, {}), **self.encoder_kwargs)
-        except Exception: # eval can throw many different errors
-            raise util.ValidationError(self.help_text) # throw the original error?
+        except Exception, e: # eval can throw many different errors
+            raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
         try:
             json.loads(value, **self.decoder_kwargs)
-        except ValueError:
-            raise util.ValidationError(self.help_text)
+        except ValueError, e:
+            raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
         return value
