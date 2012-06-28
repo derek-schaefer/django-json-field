@@ -23,12 +23,18 @@ class JSONFieldTest(TestCase):
         self.assertEqual({'test':[1,2,3]}, Test.objects.get(pk=t6.pk).json)
 
     def test_null(self):
-        with self.assertRaises(IntegrityError):
-            Test.objects.create(json=None)
-        with self.assertRaises(IntegrityError):
-            Test.objects.create(json='')
-        Test.objects.create(json_null=None)
-        Test.objects.create(json_null='')
+        t1 = Test.objects.create(json=None)
+        self.assertEqual(None, t1.json)
+        self.assertEqual('null', t1.get_json_json())
+        t2 = Test.objects.create(json='')
+        self.assertEqual(None, t2.json)
+        self.assertEqual('null', t2.get_json_json())
+        t3 = Test.objects.create(json_null=None)
+        self.assertEqual(None, t3.json_null)
+        self.assertEqual('null', t3.get_json_null_json())
+        t4 = Test.objects.create(json_null='')
+        self.assertEqual(None, t4.json_null)
+        self.assertEqual('null', t4.get_json_null_json())
 
     def test_decimal(self):
         t1 = Test.objects.create(json=Decimal(1.24))
@@ -60,3 +66,22 @@ class JSONFieldTest(TestCase):
         self.assertEqual(now_rounded, Test.objects.get(pk=t1.pk).json)
         t2 = Test.objects.create(json={'test':[{'test':now}]})
         self.assertEqual({'test':[{'test':now_rounded}]}, Test.objects.get(pk=t2.pk).json)
+
+    def test_get_set_json(self):
+        t1 = Test.objects.create(json={'test':123})
+        self.assertEqual({'test':123}, t1.json)
+        self.assertEqual('{"test": 123}', t1.get_json_json())
+        t2 = Test.objects.create()
+        self.assertEqual({}, t2.json)
+        self.assertEqual('{}', t2.get_json_json())
+        self.assertEqual(None, t2.json_null)
+        self.assertEqual('null', t2.get_json_null_json())
+        t3 = Test.objects.create(json=[1,2,3])
+        self.assertEqual([1,2,3], t3.json)
+        self.assertEqual('[1, 2, 3]', t3.get_json_json())
+        t3.set_json_json('[1, 2, 3, 4, 5]')
+        self.assertEqual([1, 2, 3, 4, 5], t3.json)
+        self.assertEqual('[1, 2, 3, 4, 5]', t3.get_json_json())
+        t3.set_json_json(123)
+        self.assertEqual(123, t3.json)
+        self.assertEqual('123', t3.get_json_json())
