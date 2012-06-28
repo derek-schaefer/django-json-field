@@ -75,7 +75,7 @@ class JSONField(models.TextField):
             decoder_kwargs.update({'cls':decoder})
         self.encoder_kwargs = encoder_kwargs
         self.decoder_kwargs = decoder_kwargs
-        kwargs['default'] = kwargs.get('default', {} if not kwargs.get('null') else None)
+        kwargs['default'] = kwargs.get('default', 'null')
         kwargs['help_text'] = kwargs.get('help_text', self.default_error_messages['invalid'])
         super(JSONField, self).__init__(*args, **kwargs)
 

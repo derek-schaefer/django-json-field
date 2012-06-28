@@ -59,7 +59,7 @@ Add a ``JSONField`` to your model like any other field.
 
 ``JSONField`` also has a few additional optional parameters.
 
- - ``default``: Falls back on ``{}`` if not provided.
+ - ``default``: Falls back on ``"null"`` if not provided
  - ``db_type``: Allows you to specify the column type (default: ``text``)
  - ``encoder``: Custom JSON encoder (default: ``DjangoJSONEncoder``)
  - ``decoder``: Custom JSON decoder (default: ``json_field.fields.JSONDecoder``)
