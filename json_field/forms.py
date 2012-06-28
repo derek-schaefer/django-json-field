@@ -14,6 +14,11 @@ class JSONFormField(fields.Field):
     def clean(self, value):
         # Have to jump through a few hoops to make this reliable
         value = super(JSONFormField, self).clean(value)
+
+        ## Got to get rid of newlines for validation to work
+        # Data newlines are escaped so this is safe
+        value = value.replace('\r', '').replace('\n', '')
+
         json_globals = { # safety first!
             '__builtins__': None,
             'datetime': datetime,
