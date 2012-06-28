@@ -115,7 +115,6 @@ class JSONField(models.TextField):
         return super(JSONField, self).formfield(**defaults)
 
     def contribute_to_class(self, cls, name):
-        self.class_name = cls
         super(JSONField, self).contribute_to_class(cls, name)
 
         def get_json(model_instance):
