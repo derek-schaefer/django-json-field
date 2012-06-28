@@ -21,10 +21,10 @@ class JSONFormField(fields.Field):
         }
         try:
             value = json.dumps(eval(value, json_globals, {}), **self.encoder_kwargs)
-        except Exception: # eval can throw many different errors
-            raise util.ValidationError(self.help_text) # throw the original error?
+        except Exception, e: # eval can throw many different errors
+            raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
         try:
             json.loads(value, **self.decoder_kwargs)
-        except ValueError:
-            raise util.ValidationError(self.help_text)
+        except ValueError, e:
+            raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
         return value
