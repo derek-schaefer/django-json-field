@@ -65,6 +65,7 @@ Add a ``JSONField`` to your model like any other field.
  - ``decoder``: Custom JSON decoder (default: ``json_field.fields.JSONDecoder``)
  - ``encoder_kwargs``: Specify all arguments to the encoder (overrides ``encoder``)
  - ``decoder_kwargs``: Specify all arguments to the decoder (overrides ``decoder``)
+ - ``simple_formfield``: Restrict use of the ``datetime`` and ``Decimal`` objects in the form field
 
 License
 -------

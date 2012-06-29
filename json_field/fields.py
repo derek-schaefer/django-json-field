@@ -68,6 +68,7 @@ class JSONField(models.TextField):
             'invalid': _(u'Enter a valid JSON object')
         }
         self._db_type = kwargs.pop('db_type', None)
+        self.simple_formfield = kwargs.pop('simple_formfield', False)
 
         encoder = kwargs.pop('encoder', DjangoJSONEncoder)
         decoder = kwargs.pop('decoder', JSONDecoder)
@@ -91,7 +92,7 @@ class JSONField(models.TextField):
         return super(JSONField, self).db_type(connection)
 
     def to_python(self, value):
-        if not value:
+        if value is None: # allow blank objects
             return None
         if isinstance(value, basestring):
             try:
@@ -114,6 +115,7 @@ class JSONField(models.TextField):
     def formfield(self, **kwargs):
         defaults = {
             'form_class': kwargs.get('form_class', JSONFormField),
+            'simple': self.simple_formfield,
             'encoder_kwargs': self.encoder_kwargs,
             'decoder_kwargs': self.decoder_kwargs,
         }

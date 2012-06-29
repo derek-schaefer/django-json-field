@@ -7,6 +7,7 @@ import decimal
 class JSONFormField(fields.Field):
 
     def __init__(self, *args, **kwargs):
+        self.simple = kwargs.pop('simple', False)
         self.encoder_kwargs = kwargs.pop('encoder_kwargs')
         self.decoder_kwargs = kwargs.pop('decoder_kwargs')
         super(JSONFormField, self).__init__(*args, **kwargs)
@@ -21,15 +22,25 @@ class JSONFormField(fields.Field):
 
         json_globals = { # safety first!
             '__builtins__': None,
-            'datetime': datetime,
-            'Decimal': decimal.Decimal,
+        }
+        if not self.simple: # optional restriction
+            json_globals.update({
+                'datetime': datetime,
+                'Decimal': decimal.Decimal,
+            })
+        json_locals = { # value compatibility
+            'null': None,
+            'true': True,
+            'false': False,
         }
         try:
-            value = json.dumps(eval(value, json_globals, {}), **self.encoder_kwargs)
+            value = json.dumps(eval(value, json_globals, json_locals), **self.encoder_kwargs)
         except Exception, e: # eval can throw many different errors
             raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
+
         try:
             json.loads(value, **self.decoder_kwargs)
         except ValueError, e:
             raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
+
         return value
