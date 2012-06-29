@@ -88,7 +88,11 @@ class JSONField(models.TextField):
         if not value:
             return None
         if isinstance(value, basestring):
-            value = json.loads(value, **self.decoder_kwargs)
+            # Catch this exception on eg. foo.json = 'a'
+            try:
+                value = json.loads(value, **self.decoder_kwargs)
+            except json.JSONDecodeError, e:
+                pass
         return value
 
     def get_db_prep_value(self, value, *args, **kwargs):
