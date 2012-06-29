@@ -19,6 +19,7 @@ setup(
     url = 'https://github.com/derek-schaefer/django-json-field',
     long_description = long_description,
     packages = ['json_field'],
+    install_requires = ['python-dateutil'],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

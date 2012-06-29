@@ -5,11 +5,20 @@ from django.utils import simplejson as json
 from django.core import exceptions
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.translation import ugettext as _
+from django.core.exceptions import ImproperlyConfigured
 
 import re
 import decimal
 from datetime import datetime
-from dateutil import parser as date_parser
+try:
+    from dateutil import parser as date_parser
+except ImportError, e:
+    raise ImproperlyConfigured('The "dateutil" library is required and was not found.')
+
+try:
+    JSON_DECODE_ERROR = json.JSONDecodeError # simplejson
+except AttributeError:
+    JSON_DECODE_ERROR = ValueError # Python json lib
 
 TIME_RE = re.compile(r'^\d{2}:\d{2}:\d{2}')
 DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}(?!T)')
@@ -97,7 +106,7 @@ class JSONField(models.TextField):
         if isinstance(value, basestring):
             try:
                 value = json.loads(value, **self.decoder_kwargs)
-            except json.JSONDecodeError, e:
+            except JSON_DECODE_ERROR:
                 pass
         return value
 

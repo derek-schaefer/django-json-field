@@ -18,6 +18,10 @@ While the JSON string will not be deserialized until it is accessed it can still
 Installation
 ------------
 
+First, install the ``dateutil`` library:
+
+    ``pip install python-dateutil``
+
 Install from PyPI:
 
     ``pip install django-json-field``
