@@ -63,11 +63,10 @@ class JSONField(models.TextField):
 
     description = 'JSON object'
 
-    default_error_messages = {
-        'invalid': _(u'Enter a valid JSON object')
-    }
-
     def __init__(self, *args, **kwargs):
+        self.default_error_messages = {
+            'invalid': _(u'Enter a valid JSON object')
+        }
         self._db_type = kwargs.pop('db_type', None)
 
         encoder = kwargs.pop('encoder', DjangoJSONEncoder)
