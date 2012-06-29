@@ -12,19 +12,20 @@ import decimal
 from datetime import datetime
 try:
     from dateutil import parser as date_parser
-except ImportError, e:
+except ImportError:
     raise ImproperlyConfigured('The "dateutil" library is required and was not found.')
 
 try:
     JSON_DECODE_ERROR = json.JSONDecodeError # simplejson
 except AttributeError:
-    JSON_DECODE_ERROR = ValueError # Python json lib
+    JSON_DECODE_ERROR = ValueError # other
 
 TIME_RE = re.compile(r'^\d{2}:\d{2}:\d{2}')
 DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}(?!T)')
 DATETIME_RE = re.compile(r'^\d{4}-\d{2}-\d{2}T')
 
 class JSONDecoder(json.JSONDecoder):
+    """ Recursive JSON to Python deserialization. """
 
     _recursable_types = [str, unicode, list, dict]
 
