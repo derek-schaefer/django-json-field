@@ -75,7 +75,7 @@ class JSONField(models.TextField):
             decoder_kwargs.update({'cls':decoder})
         self.encoder_kwargs = encoder_kwargs
         self.decoder_kwargs = decoder_kwargs
-        kwargs['default'] = kwargs.get('default', {})
+        kwargs['default'] = kwargs.get('default', 'null')
         kwargs['help_text'] = kwargs.get('help_text', self.default_error_messages['invalid'])
         super(JSONField, self).__init__(*args, **kwargs)
 
@@ -88,14 +88,11 @@ class JSONField(models.TextField):
         if not value:
             return None
         if isinstance(value, basestring):
-            try:
-                value = json.loads(value, **self.decoder_kwargs)
-            except json.JSONDecodeError:
-                pass
+            value = json.loads(value, **self.decoder_kwargs)
         return value
 
     def get_db_prep_value(self, value, *args, **kwargs):
-        if value is None:
+        if self.null and value is None and not kwargs.get('force'):
             return None
         return json.dumps(value, **self.encoder_kwargs)
 
@@ -115,11 +112,10 @@ class JSONField(models.TextField):
         return super(JSONField, self).formfield(**defaults)
 
     def contribute_to_class(self, cls, name):
-        self.class_name = cls
         super(JSONField, self).contribute_to_class(cls, name)
 
         def get_json(model_instance):
-            return self.get_db_prep_value(getattr(model_instance, self.attname, None))
+            return self.get_db_prep_value(getattr(model_instance, self.attname, None), force=True)
         setattr(cls, 'get_%s_json' % self.name, get_json)
 
         def set_json(model_instance, value):
