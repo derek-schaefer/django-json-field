@@ -2,6 +2,7 @@ from test_project.app.models import Test
 
 from django.test import TestCase
 from django.db.utils import IntegrityError
+from django.utils import simplejson as json
 
 import datetime
 from decimal import Decimal
@@ -85,3 +86,17 @@ class JSONFieldTest(TestCase):
         t3.set_json_json(123)
         self.assertEqual(123, t3.json)
         self.assertEqual('123', t3.get_json_json())
+
+    def test_strings(self):
+        t1 = Test.objects.create(json='a')
+        self.assertEqual('a', t1.json)
+        self.assertEqual('"a"', t1.get_json_json())
+        t2 = Test.objects.create(json='"a"')
+        self.assertEqual('a', t2.json)
+        self.assertEqual('"a"', t2.get_json_json())
+        t3 = Test.objects.create(json_null='a')
+        self.assertEqual('a', t3.json_null)
+        self.assertEqual('"a"', t3.get_json_null_json())
+        t4 = Test.objects.create(json='"a')
+        self.assertEqual('"a', t4.json)
+        self.assertEqual('"\\"a"', t4.get_json_json())
