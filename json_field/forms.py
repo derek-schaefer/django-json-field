@@ -16,6 +16,10 @@ class JSONFormField(fields.Field):
         # Have to jump through a few hoops to make this reliable
         value = super(JSONFormField, self).clean(value)
 
+        # allow an empty value on an optional field
+        if value is None:
+            return value
+
         ## Got to get rid of newlines for validation to work
         # Data newlines are escaped so this is safe
         value = value.replace('\r', '').replace('\n', '')
