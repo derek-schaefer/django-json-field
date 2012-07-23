@@ -1,4 +1,5 @@
 from test_project.app.models import Test
+from test_project.app.forms import TestForm
 
 from django.test import TestCase
 from django.db.utils import IntegrityError
@@ -100,3 +101,9 @@ class JSONFieldTest(TestCase):
         t4 = Test.objects.create(json='"a')
         self.assertEqual('"a', t4.json)
         self.assertEqual('"\\"a"', t4.get_json_json())
+
+    def test_formfield(self):
+        data = {'json': '{}'}
+        f1 = TestForm(data)
+        self.assertTrue(f1.is_valid())
+        self.assertEqual(f1.cleaned_data, data)

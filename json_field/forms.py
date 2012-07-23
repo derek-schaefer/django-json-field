@@ -8,8 +8,8 @@ class JSONFormField(fields.Field):
 
     def __init__(self, *args, **kwargs):
         self.simple = kwargs.pop('simple', False)
-        self.encoder_kwargs = kwargs.pop('encoder_kwargs')
-        self.decoder_kwargs = kwargs.pop('decoder_kwargs')
+        self.encoder_kwargs = kwargs.pop('encoder_kwargs', {})
+        self.decoder_kwargs = kwargs.pop('decoder_kwargs', {})
         super(JSONFormField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
