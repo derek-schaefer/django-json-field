@@ -96,10 +96,10 @@ class JSONField(models.TextField):
 
         super(JSONField, self).__init__(*args, **kwargs)
 
-    def db_type(self, connection):
+    def db_type(self, *args, **kwargs):
         if self._db_type:
             return self._db_type
-        return super(JSONField, self).db_type(connection)
+        return super(JSONField, self).db_type(*args, **kwargs)
 
     def to_python(self, value):
         if value is None: # allow blank objects
