@@ -8,7 +8,6 @@ from django.utils.translation import ugettext as _
 from django.core.exceptions import ImproperlyConfigured
 
 import re
-import decimal
 from datetime import datetime
 try:
     from dateutil import parser as date_parser

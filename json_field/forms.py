@@ -2,7 +2,6 @@ from django.forms import fields, util
 from django.utils import simplejson as json
 
 import datetime
-import decimal
 
 class JSONFormField(fields.Field):
 
@@ -28,10 +27,7 @@ class JSONFormField(fields.Field):
             '__builtins__': None,
         }
         if not self.simple: # optional restriction
-            json_globals.update({
-                'datetime': datetime,
-                'Decimal': decimal.Decimal,
-            })
+            json_globals.update({'datetime':datetime})
         json_locals = { # value compatibility
             'null': None,
             'true': True,

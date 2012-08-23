@@ -7,9 +7,9 @@ A form field is also provided. It will accept serialized representations:
 
     ``{"date": "2012-04-23T19:16:54.133", "num": "1.2399"}``
 
-And also provides safe access to the ``datetime`` module and ``Decimal`` class for explicit use:
+And also provides safe access to the ``datetime`` module for explicit use:
 
-    ``{"date": datetime.datetime(2012, 4, 23, 19, 16, 54, 133000), "num": Decimal('1.2399')}``
+    ``{"date": datetime.datetime(2012, 4, 23, 19, 16, 54, 133000)}``
 
 While the JSON string will not be deserialized until it is accessed it can still be a performance concern. You may find it valuable to disable deserialization (``JSONField(decoder=None)``), or to defer loading the field altogether (i.e. ``MyModel.objects.all().defer('json')``).
 
@@ -69,7 +69,7 @@ Add a ``JSONField`` to your model like any other field.
  - ``decoder``: Custom JSON decoder (default: ``json_field.fields.JSONDecoder``)
  - ``encoder_kwargs``: Specify all arguments to the encoder (overrides ``encoder``)
  - ``decoder_kwargs``: Specify all arguments to the decoder (overrides ``decoder``)
- - ``simple_formfield``: Restrict use of the ``datetime`` and ``Decimal`` objects in the form field
+ - ``simple_formfield``: Restrict use of the ``datetime`` object in the form field
 
 License
 -------
