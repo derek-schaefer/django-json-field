@@ -45,10 +45,6 @@ class JSONDecoder(json.JSONDecoder):
                 if self._is_recursive(value):
                     obj[key] = self.decode(value, recurse=True)
         elif isinstance(obj, basestring):
-            try:
-                return decimal.Decimal(obj)
-            except decimal.InvalidOperation:
-                pass
             if TIME_RE.match(obj):
                 try:
                     return date_parser.parse(obj).time()

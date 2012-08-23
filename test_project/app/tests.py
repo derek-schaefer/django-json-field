@@ -69,6 +69,12 @@ class JSONFieldTest(TestCase):
         t2 = Test.objects.create(json={'test':[{'test':now}]})
         self.assertEqual({'test':[{'test':now_rounded}]}, Test.objects.get(pk=t2.pk).json)
 
+    def test_numerical_strings(self):
+        t1 = Test.objects.create(json='"555"')
+        self.assertEqual('555', Test.objects.get(pk=t1.pk).json)
+        t2 = Test.objects.create(json='"123.98712634789162349781264"')
+        self.assertEqual('123.98712634789162349781264', Test.objects.get(pk=t2.pk).json)
+
     def test_get_set_json(self):
         t1 = Test.objects.create(json={'test':123})
         self.assertEqual({'test':123}, t1.json)
