@@ -8,6 +8,7 @@ from django.utils.translation import ugettext as _
 from django.core.exceptions import ImproperlyConfigured
 
 import re
+from decimal import Decimal
 from datetime import datetime
 try:
     from dateutil import parser as date_parser
@@ -82,7 +83,7 @@ class JSONField(models.TextField):
         if not encoder_kwargs and encoder:
             encoder_kwargs.update({'cls':encoder})
         if not decoder_kwargs and decoder:
-            decoder_kwargs.update({'cls':decoder})
+            decoder_kwargs.update({'cls':decoder, 'parse_float':Decimal})
         self.encoder_kwargs = encoder_kwargs
         self.decoder_kwargs = decoder_kwargs
 
