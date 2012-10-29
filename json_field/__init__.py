@@ -3,4 +3,4 @@ try:
 except ImportError:
     pass # fails when imported by setup.py, no worries
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
