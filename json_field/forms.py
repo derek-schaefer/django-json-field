@@ -6,7 +6,7 @@ import datetime
 class JSONFormField(fields.Field):
 
     def __init__(self, *args, **kwargs):
-        self.simple = kwargs.pop('simple', False)
+        self.evaluate = kwargs.pop('evaluate', False)
         self.encoder_kwargs = kwargs.pop('encoder_kwargs', {})
         self.decoder_kwargs = kwargs.pop('decoder_kwargs', {})
         super(JSONFormField, self).__init__(*args, **kwargs)
@@ -23,20 +23,20 @@ class JSONFormField(fields.Field):
         # Data newlines are escaped so this is safe
         value = value.replace('\r', '').replace('\n', '')
 
-        json_globals = { # safety first!
-            '__builtins__': None,
-        }
-        if not self.simple: # optional restriction
-            json_globals.update({'datetime':datetime})
-        json_locals = { # value compatibility
-            'null': None,
-            'true': True,
-            'false': False,
-        }
-        try:
-            value = json.dumps(eval(value, json_globals, json_locals), **self.encoder_kwargs)
-        except Exception, e: # eval can throw many different errors
-            raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
+        if self.evaluate:
+            json_globals = { # "safety" first!
+                '__builtins__': None,
+                'datetime': datetime,
+            }
+            json_locals = { # value compatibility
+                'null': None,
+                'true': True,
+                'false': False,
+            }
+            try:
+                value = json.dumps(eval(value, json_globals, json_locals), **self.encoder_kwargs)
+            except Exception, e: # eval can throw many different errors
+                raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
 
         try:
             json.loads(value, **self.decoder_kwargs)

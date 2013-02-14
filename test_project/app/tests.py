@@ -1,5 +1,8 @@
+from json_field.fields import JSON_DECODE_ERROR
+
 from test_project.app.models import Test
-from test_project.app.forms import TestForm, OptionalForm
+from test_project.app.forms import TestForm, OptionalForm, \
+    EvalForm, ModelForm
 
 from django.test import TestCase
 from django.db.utils import IntegrityError
@@ -120,3 +123,11 @@ class JSONFieldTest(TestCase):
         f3 = OptionalForm({})
         self.assertTrue(f3.is_valid())
         self.assertEqual(f3.cleaned_data, {'json': None})
+        f4 = TestForm({'json':'{"time": datetime.datetime.now()}'})
+        self.assertFalse(f4.is_valid())
+        f5 = EvalForm({'json':'{"time": datetime.datetime.now()}'})
+        self.assertTrue(f5.is_valid())
+        f6 = ModelForm({'json':'{"time": datetime.datetime.now()}'})
+        self.assertFalse(f4.is_valid())
+        f7 = ModelForm({'json':'{"time": datetime.datetime.now()}'})
+        self.assertTrue(f5.is_valid())
