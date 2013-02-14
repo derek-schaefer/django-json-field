@@ -142,6 +142,15 @@ class JSONField(models.TextField):
 try:
     # add support for South migrations
     from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ['^json_field\.fields\.JSONField'])
+    rules = [
+        (
+            (JSONField,),
+            [],
+            {
+                'db_type': ['_db_type', {'default': None}]
+            }
+        )
+    ]
+    add_introspection_rules(rules, ['^json_field\.fields\.JSONField'])
 except ImportError:
     pass
