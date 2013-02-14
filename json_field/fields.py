@@ -62,10 +62,34 @@ class JSONDecoder(json.JSONDecoder):
                     pass
         return obj
 
+class Creator(object):
+    """
+    Taken from django.db.models.fields.subclassing.
+    """
+
+    def __init__(self, field):
+        self.field = field
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            raise AttributeError('Can only be accessed via an instance.')
+
+        key = '_%s_deserialized' % self.field.name
+
+        if getattr(obj, key, False):
+            return obj.__dict__[self.field.name]
+
+        value = self.field.to_python(obj.__dict__[self.field.name])
+        obj.__dict__[self.field.name] = value
+        setattr(obj, key, True)
+
+        return value
+
+    def __set__(self, obj, value):
+        obj.__dict__[self.field.name] = value # deserialized when accessed
+
 class JSONField(models.TextField):
     """ Stores and loads valid JSON objects. """
-
-    __metaclass__ = models.SubfieldBase
 
     description = 'JSON object'
 
@@ -138,6 +162,8 @@ class JSONField(models.TextField):
         def set_json(model_instance, value):
             return setattr(model_instance, self.attname, self.to_python(value))
         setattr(cls, 'set_%s_json' % self.name, set_json)
+
+        setattr(cls, name, Creator(self)) # deferred deserialization
 
 try:
     # add support for South migrations
