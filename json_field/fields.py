@@ -67,6 +67,8 @@ class Creator(object):
     Taken from django.db.models.fields.subclassing.
     """
 
+    _parent_key = '_json_field_cache'
+
     def __init__(self, field):
         self.field = field
 
@@ -74,14 +76,19 @@ class Creator(object):
         if obj is None:
             raise AttributeError('Can only be accessed via an instance.')
 
-        key = '_%s_deserialized' % self.field.name
+        cache = getattr(obj, self._parent_key, None)
+        if cache is None:
+            cache = {}
+            setattr(obj, self._parent_key, cache)
 
-        if getattr(obj, key, False):
+        key = '%s_deserialized' %  self.field.name
+
+        if cache.get(key, False):
             return obj.__dict__[self.field.name]
 
         value = self.field.to_python(obj.__dict__[self.field.name])
         obj.__dict__[self.field.name] = value
-        setattr(obj, key, True)
+        cache[key] = True
 
         return value
 

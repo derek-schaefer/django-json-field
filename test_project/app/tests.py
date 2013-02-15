@@ -26,6 +26,12 @@ class JSONFieldTest(TestCase):
         self.assertEqual({'test':[1,2,3]}, Test.objects.get(pk=t5.pk).json)
         t6 = Test.objects.create(json='{"test":[1,2,3]}')
         self.assertEqual({'test':[1,2,3]}, Test.objects.get(pk=t6.pk).json)
+        t7 = Test.objects.create(json=[1,2,3])
+        t7.json = {'asdf':123}
+        self.assertEqual({'asdf':123}, t7.json)
+        t8 = Test.objects.get(pk=t7.pk)
+        t8.json = {'asdf':123}
+        self.assertEqual({'asdf':123}, t8.json)
 
     def test_null(self):
         t1 = Test.objects.create(json=None)
