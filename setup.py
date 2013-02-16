@@ -1,6 +1,4 @@
-import json_field
-
-from distutils.core import setup
+from setuptools import setup
 
 description = 'Generic JSON model and form fields.'
 
@@ -12,14 +10,14 @@ except IOError:
 
 setup(
     name = 'django-json-field',
-    version = json_field.__version__,
+    version = '0.5',
     description = description,
     author = 'Derek Schaefer',
     author_email = 'derek.schaefer@gmail.com',
     url = 'https://github.com/derek-schaefer/django-json-field',
     long_description = long_description,
     packages = ['json_field'],
-    install_requires = ['python-dateutil'],
+    install_requires = ['django >= 1.2.7', 'python-dateutil'],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
