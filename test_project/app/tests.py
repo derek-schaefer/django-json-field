@@ -51,9 +51,10 @@ class JSONFieldTest(TestCase):
         t1 = Test.objects.create(json=1.24)
         self.assertEqual(Decimal('1.24'), Test.objects.get(pk=t1.pk).json)
         t2 = Test.objects.create(json=Decimal(1.24))
-        self.assertEqual(Decimal(1.24), Test.objects.get(pk=t2.pk).json)
+        dec_str = '1.2399999999999999911182158029987476766109466552734375'
+        self.assertEqual(dec_str, Test.objects.get(pk=t2.pk).json)
         t3 = Test.objects.create(json={'test':[{'test':Decimal(1.24)}]})
-        self.assertEqual({'test':[{'test':Decimal(1.24)}]}, Test.objects.get(pk=t3.pk).json)
+        self.assertEqual({'test':[{'test':dec_str}]}, Test.objects.get(pk=t3.pk).json)
 
     def test_time(self):
         now = datetime.datetime.now().time()
