@@ -33,6 +33,26 @@ class JSONFieldTest(TestCase):
         t8.json = {'asdf':123}
         self.assertEqual({'asdf':123}, t8.json)
 
+    def test_eager(self):
+        t1 = Test.objects.create(json_eager=123)
+        self.assertEqual(123, Test.objects.get(pk=t1.pk).json_eager)
+        t2 = Test.objects.create(json_eager='123')
+        self.assertEqual(123, Test.objects.get(pk=t2.pk).json_eager)
+        t3 = Test.objects.create(json_eager=[123])
+        self.assertEqual([123], Test.objects.get(pk=t3.pk).json_eager)
+        t4 = Test.objects.create(json_eager='[123]')
+        self.assertEqual([123], Test.objects.get(pk=t4.pk).json_eager)
+        t5 = Test.objects.create(json_eager={'test':[1,2,3]})
+        self.assertEqual({'test':[1,2,3]}, Test.objects.get(pk=t5.pk).json_eager)
+        t6 = Test.objects.create(json_eager='{"test":[1,2,3]}')
+        self.assertEqual({'test':[1,2,3]}, Test.objects.get(pk=t6.pk).json_eager)
+        t7 = Test.objects.create(json_eager=[1,2,3])
+        t7.json_eager = {'asdf':123}
+        self.assertEqual({'asdf':123}, t7.json_eager)
+        t8 = Test.objects.get(pk=t7.pk)
+        t8.json_eager = {'asdf':123}
+        self.assertEqual({'asdf':123}, t8.json_eager)
+
     def test_null(self):
         t1 = Test.objects.create(json=None)
         self.assertEqual(None, t1.json)

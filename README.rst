@@ -65,6 +65,7 @@ Add a ``JSONField`` to your model like any other field.
 
  - ``default``: Falls back on ``"null"`` if not provided and ``null=False``, otherwise ``None``
  - ``db_type``: Allows you to specify the column type (default: ``text``)
+ - ``lazy``: Defer deserialization until the field is directly accessed (default: ``True``)
  - ``encoder``: Custom JSON encoder (default: ``DjangoJSONEncoder``)
  - ``decoder``: Custom JSON decoder (default: ``json_field.fields.JSONDecoder``)
  - ``encoder_kwargs``: Specify all arguments to the encoder (overrides ``encoder``)

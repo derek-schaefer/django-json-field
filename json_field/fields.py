@@ -67,33 +67,35 @@ class Creator(object):
     Taken from django.db.models.fields.subclassing.
     """
 
-    _parent_key = '_json_field_cache'
+    _state_key = '_json_field_state'
 
-    def __init__(self, field):
+    def __init__(self, field, lazy):
         self.field = field
+        self.lazy = lazy
 
     def __get__(self, obj, type=None):
         if obj is None:
             raise AttributeError('Can only be accessed via an instance.')
 
-        cache = getattr(obj, self._parent_key, None)
-        if cache is None:
-            cache = {}
-            setattr(obj, self._parent_key, cache)
+        if self.lazy:
+            state = getattr(obj, self._state_key, None)
+            if state is None:
+                state = {}
+                setattr(obj, self._state_key, state)
 
-        key = '%s_deserialized' %  self.field.name
+            if state.get(self.field.name, False):
+                return obj.__dict__[self.field.name]
 
-        if cache.get(key, False):
-            return obj.__dict__[self.field.name]
-
-        value = self.field.to_python(obj.__dict__[self.field.name])
-        obj.__dict__[self.field.name] = value
-        cache[key] = True
+            value = self.field.to_python(obj.__dict__[self.field.name])
+            obj.__dict__[self.field.name] = value
+            state[self.field.name] = True
+        else:
+            value = obj.__dict__[self.field.name]
 
         return value
 
     def __set__(self, obj, value):
-        obj.__dict__[self.field.name] = value # deserialized when accessed
+        obj.__dict__[self.field.name] = value if self.lazy else self.field.to_python(value)
 
 class JSONField(models.TextField):
     """ Stores and loads valid JSON objects. """
@@ -107,6 +109,7 @@ class JSONField(models.TextField):
         self._db_type = kwargs.pop('db_type', None)
         self.evaluate_formfield = kwargs.pop('evaluate_formfield', False)
 
+        self.lazy = kwargs.pop('lazy', True)
         encoder = kwargs.pop('encoder', DjangoJSONEncoder)
         decoder = kwargs.pop('decoder', JSONDecoder)
         encoder_kwargs = kwargs.pop('encoder_kwargs', {})
@@ -170,7 +173,7 @@ class JSONField(models.TextField):
             return setattr(model_instance, self.attname, self.to_python(value))
         setattr(cls, 'set_%s_json' % self.name, set_json)
 
-        setattr(cls, name, Creator(self)) # deferred deserialization
+        setattr(cls, name, Creator(self, lazy=self.lazy)) # deferred deserialization
 
 try:
     # add support for South migrations
