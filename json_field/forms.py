@@ -2,13 +2,15 @@ from django.forms import fields, util
 from django.utils import simplejson as json
 
 import datetime
+from decimal import Decimal
 
 class JSONFormField(fields.Field):
 
     def __init__(self, *args, **kwargs):
+        from fields import JSONEncoder, JSONDecoder
         self.evaluate = kwargs.pop('evaluate', False)
-        self.encoder_kwargs = kwargs.pop('encoder_kwargs', {})
-        self.decoder_kwargs = kwargs.pop('decoder_kwargs', {})
+        self.encoder_kwargs = kwargs.pop('encoder_kwargs', {'cls':JSONEncoder})
+        self.decoder_kwargs = kwargs.pop('decoder_kwargs', {'cls':JSONDecoder, 'parse_float':Decimal})
         super(JSONFormField, self).__init__(*args, **kwargs)
 
     def clean(self, value):

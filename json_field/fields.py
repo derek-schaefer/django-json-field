@@ -3,13 +3,13 @@ from json_field.forms import JSONFormField
 from django.db import models
 from django.utils import simplejson as json
 from django.core import exceptions
-from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.timezone import is_aware
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ImproperlyConfigured
 
 import re
-from decimal import Decimal
-from datetime import datetime
+import decimal
+import datetime
 try:
     from dateutil import parser as date_parser
 except ImportError:
@@ -23,6 +23,33 @@ except AttributeError:
 TIME_RE = re.compile(r'^\d{2}:\d{2}:\d{2}')
 DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}(?!T)')
 DATETIME_RE = re.compile(r'^\d{4}-\d{2}-\d{2}T')
+
+class JSONEncoder(json.JSONEncoder):
+    """
+    JSONEncoder subclass that knows how to encode date/time and decimal types.
+    """
+    def default(self, o):
+        # See "Date Time String Format" in the ECMA-262 specification.
+        if isinstance(o, datetime.datetime):
+            r = o.isoformat()
+            if o.microsecond:
+                r = r[:23] + r[26:]
+            if r.endswith('+00:00'):
+                r = r[:-6] + 'Z'
+            return r
+        elif isinstance(o, datetime.date):
+            return o.isoformat()
+        elif isinstance(o, datetime.time):
+            if is_aware(o):
+                raise ValueError("JSON can't represent timezone-aware times.")
+            r = o.isoformat()
+            if o.microsecond:
+                r = r[:12]
+            return r
+        elif isinstance(o, decimal.Decimal):
+            return str(o)
+        else:
+            return super(JSONEncoder, self).default(o)
 
 class JSONDecoder(json.JSONDecoder):
     """ Recursive JSON to Python deserialization. """
@@ -110,14 +137,14 @@ class JSONField(models.TextField):
         self.evaluate_formfield = kwargs.pop('evaluate_formfield', False)
 
         self.lazy = kwargs.pop('lazy', True)
-        encoder = kwargs.pop('encoder', DjangoJSONEncoder)
+        encoder = kwargs.pop('encoder', JSONEncoder)
         decoder = kwargs.pop('decoder', JSONDecoder)
         encoder_kwargs = kwargs.pop('encoder_kwargs', {})
         decoder_kwargs = kwargs.pop('decoder_kwargs', {})
         if not encoder_kwargs and encoder:
             encoder_kwargs.update({'cls':encoder})
         if not decoder_kwargs and decoder:
-            decoder_kwargs.update({'cls':decoder, 'parse_float':Decimal})
+            decoder_kwargs.update({'cls':decoder, 'parse_float':decimal.Decimal})
         self.encoder_kwargs = encoder_kwargs
         self.decoder_kwargs = decoder_kwargs
 
