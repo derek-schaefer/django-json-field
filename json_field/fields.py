@@ -4,7 +4,7 @@ from django.db import models
 from django.utils import simplejson as json
 from django.core import exceptions
 from django.utils.timezone import is_aware
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 
 import re
