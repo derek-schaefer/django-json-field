@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from json_field.forms import JSONFormField
 
 from django.db import models
@@ -6,6 +7,7 @@ from django.core import exceptions
 from django.utils.timezone import is_aware
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
+from django.utils import six
 
 import re
 import decimal
@@ -54,7 +56,8 @@ class JSONEncoder(json.JSONEncoder):
 class JSONDecoder(json.JSONDecoder):
     """ Recursive JSON to Python deserialization. """
 
-    _recursable_types = [str, unicode, list, dict]
+    _recursable_types = [str] if six.PY3 else [str, unicode]
+    _recursable_types += [list, dict]
 
     def _is_recursive(self, obj):
         return type(obj) in JSONDecoder._recursable_types
@@ -63,7 +66,7 @@ class JSONDecoder(json.JSONDecoder):
         if not kwargs.get('recurse', False):
             obj = super(JSONDecoder, self).decode(obj, *args, **kwargs)
         if isinstance(obj, list):
-            for i in xrange(len(obj)):
+            for i in range(len(obj)):
                 item = obj[i]
                 if self._is_recursive(item):
                     obj[i] = self.decode(item, recurse=True)
@@ -71,7 +74,7 @@ class JSONDecoder(json.JSONDecoder):
             for key, value in obj.items():
                 if self._is_recursive(value):
                     obj[key] = self.decode(value, recurse=True)
-        elif isinstance(obj, basestring):
+        elif isinstance(obj, six.string_types):
             if TIME_RE.match(obj):
                 try:
                     return date_parser.parse(obj).time()
@@ -131,7 +134,7 @@ class JSONField(models.TextField):
 
     def __init__(self, *args, **kwargs):
         self.default_error_messages = {
-            'invalid': _(u'Enter a valid JSON object')
+            'invalid': _('Enter a valid JSON object')
         }
         self._db_type = kwargs.pop('db_type', None)
         self.evaluate_formfield = kwargs.pop('evaluate_formfield', False)
@@ -161,7 +164,7 @@ class JSONField(models.TextField):
     def to_python(self, value):
         if value is None: # allow blank objects
             return None
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             try:
                 value = json.loads(value, **self.decoder_kwargs)
             except JSON_DECODE_ERROR:

@@ -7,7 +7,7 @@ from decimal import Decimal
 class JSONFormField(fields.Field):
 
     def __init__(self, *args, **kwargs):
-        from fields import JSONEncoder, JSONDecoder
+        from .fields import JSONEncoder, JSONDecoder
         self.evaluate = kwargs.pop('evaluate', False)
         self.encoder_kwargs = kwargs.pop('encoder_kwargs', {'cls':JSONEncoder})
         self.decoder_kwargs = kwargs.pop('decoder_kwargs', {'cls':JSONDecoder, 'parse_float':Decimal})
@@ -37,12 +37,12 @@ class JSONFormField(fields.Field):
             }
             try:
                 value = json.dumps(eval(value, json_globals, json_locals), **self.encoder_kwargs)
-            except Exception, e: # eval can throw many different errors
+            except Exception as e: # eval can throw many different errors
                 raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
 
         try:
             json.loads(value, **self.decoder_kwargs)
-        except ValueError, e:
+        except ValueError as e:
             raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
 
         return value

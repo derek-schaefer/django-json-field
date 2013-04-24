@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from __future__ import division
 from json_field.fields import JSON_DECODE_ERROR
 
 from test_project.app.models import Test
@@ -5,6 +7,7 @@ from test_project.app.forms import TestForm, OptionalForm, \
     EvalForm, ModelForm
 
 from django.test import TestCase
+from django.utils import unittest
 from django.db.utils import IntegrityError
 from django.utils import simplejson as json
 
@@ -79,7 +82,7 @@ class JSONFieldTest(TestCase):
         now = datetime.datetime.now().time()
         t1 = Test.objects.create(json=now)
         # JSON does not have microsecond precision, round to millisecond
-        now_rounded = now.replace(microsecond=(int(now.microsecond) / 1000) * 1000)
+        now_rounded = now.replace(microsecond=(int(now.microsecond) // 1000) * 1000)
         self.assertEqual(now_rounded, Test.objects.get(pk=t1.pk).json)
         t2 = Test.objects.create(json={'time':[now]})
         self.assertEqual({'time':[now_rounded]}, Test.objects.get(pk=t2.pk).json)
@@ -95,7 +98,7 @@ class JSONFieldTest(TestCase):
         now = datetime.datetime.now()
         t1 = Test.objects.create(json=now)
         # JSON does not have microsecond precision, round to millisecond
-        now_rounded = now.replace(microsecond=(int(now.microsecond) / 1000) * 1000)
+        now_rounded = now.replace(microsecond=(int(now.microsecond) // 1000) * 1000)
         self.assertEqual(now_rounded, Test.objects.get(pk=t1.pk).json)
         t2 = Test.objects.create(json={'test':[{'test':now}]})
         self.assertEqual({'test':[{'test':now_rounded}]}, Test.objects.get(pk=t2.pk).json)
