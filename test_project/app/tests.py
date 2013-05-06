@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
-from __future__ import division
+from __future__ import unicode_literals, division
+
 from json_field.fields import JSON_DECODE_ERROR
 
 from test_project.app.models import Test

@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
+
 from .models import Test
 
-from json_field.forms import JSONFormField
-
 from django import forms
+from json_field.forms import JSONFormField
 
 class ModelForm(forms.ModelForm):
     class Meta:

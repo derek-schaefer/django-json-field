@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 from json_field.forms import JSONFormField
 
 from django.db import models
@@ -7,11 +8,11 @@ from django.core import exceptions
 from django.utils.timezone import is_aware
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 
 import re
 import decimal
 import datetime
+import six
 try:
     from dateutil import parser as date_parser
 except ImportError:
@@ -56,8 +57,7 @@ class JSONEncoder(json.JSONEncoder):
 class JSONDecoder(json.JSONDecoder):
     """ Recursive JSON to Python deserialization. """
 
-    _recursable_types = [str] if six.PY3 else [str, unicode]
-    _recursable_types += [list, dict]
+    _recursable_types = ([str] if six.PY3 else [str, unicode]) + [list, dict]
 
     def _is_recursive(self, obj):
         return type(obj) in JSONDecoder._recursable_types
@@ -66,7 +66,7 @@ class JSONDecoder(json.JSONDecoder):
         if not kwargs.get('recurse', False):
             obj = super(JSONDecoder, self).decode(obj, *args, **kwargs)
         if isinstance(obj, list):
-            for i in range(len(obj)):
+            for i in six.moves.xrange(len(obj)):
                 item = obj[i]
                 if self._is_recursive(item):
                     obj[i] = self.decode(item, recurse=True)

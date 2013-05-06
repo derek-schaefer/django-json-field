@@ -17,7 +17,7 @@ setup(
     url = 'https://github.com/derek-schaefer/django-json-field',
     long_description = long_description,
     packages = ['json_field'],
-    install_requires = ['django >= 1.2.7', 'python-dateutil'],
+    install_requires = ['django >= 1.2.7', 'python-dateutil', 'six >= 1.2.0'],
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
