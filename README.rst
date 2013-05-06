@@ -13,18 +13,18 @@ And also provides safe access to the ``datetime`` module for explicit use:
 
 While the JSON string will not be deserialized until it is accessed it can still be a performance concern, so you may find it valuable to disable the custom deserializer (``JSONField(decoder=None)``).
 
-``django-json-field`` is also compatible with South.
+``django-json-field`` is also compatible with South and Python 3.
 
 Installation
 ------------
 
-First, install the ``dateutil`` library:
-
-    ``pip install python-dateutil``
-
 Install from PyPI:
 
     ``pip install django-json-field``
+
+If installing manually, first install the dependencies:
+
+    ``pip install python-dateutil six``
 
 Install from GitHub:
 
