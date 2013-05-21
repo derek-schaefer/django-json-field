@@ -38,11 +38,11 @@ class JSONFormField(fields.Field):
             try:
                 value = json.dumps(eval(value, json_globals, json_locals), **self.encoder_kwargs)
             except Exception as e: # eval can throw many different errors
-                raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
+                raise util.ValidationError(str(e))
 
         try:
             json.loads(value, **self.decoder_kwargs)
         except ValueError as e:
-            raise util.ValidationError('%s (Caught "%s")' % (self.help_text, e))
+            raise util.ValidationError(str(e))
 
         return value
