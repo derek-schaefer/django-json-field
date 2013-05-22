@@ -7,12 +7,16 @@ from test_project.app.forms import TestForm, OptionalForm, \
     EvalForm, ModelForm
 
 from django.test import TestCase
-from django.utils import unittest
 from django.db.utils import IntegrityError
 from django.utils import simplejson as json
 
 import datetime
 from decimal import Decimal
+
+try:
+    from django.utils import unittest
+except ImportError:
+    import unittest
 
 class JSONFieldTest(TestCase):
 
