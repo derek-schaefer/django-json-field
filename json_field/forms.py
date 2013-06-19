@@ -41,8 +41,6 @@ class JSONFormField(fields.Field):
                 raise util.ValidationError(str(e))
 
         try:
-            json.loads(value, **self.decoder_kwargs)
+            return json.loads(value, **self.decoder_kwargs)
         except ValueError as e:
             raise util.ValidationError(str(e))
-
-        return value

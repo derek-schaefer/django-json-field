@@ -147,10 +147,10 @@ class JSONFieldTest(TestCase):
         self.assertEqual('"\\"a"', t4.get_json_json())
 
     def test_formfield(self):
-        data = {'json': '{}'}
+        data = {'json': '{"asdf":42}'}
         f1 = TestForm(data)
         self.assertTrue(f1.is_valid())
-        self.assertEqual(f1.cleaned_data, data)
+        self.assertEqual(f1.cleaned_data, {'json': {'asdf':42}})
         f2 = TestForm({})
         self.assertFalse(f2.is_valid())
         f3 = OptionalForm({})
