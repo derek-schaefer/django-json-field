@@ -1,22 +1,14 @@
 from __future__ import unicode_literals, division
 
-from json_field.fields import JSON_DECODE_ERROR
-
 from test_project.app.models import Test
 from test_project.app.forms import TestForm, OptionalForm, \
     EvalForm, ModelForm
 
 from django.test import TestCase
-from django.db.utils import IntegrityError
-from django.utils import simplejson as json
 
 import datetime
 from decimal import Decimal
 
-try:
-    from django.utils import unittest
-except ImportError:
-    import unittest
 
 class JSONFieldTest(TestCase):
 

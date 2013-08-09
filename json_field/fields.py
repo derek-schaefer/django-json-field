@@ -1,11 +1,10 @@
 from __future__ import unicode_literals
+import json
 
 from json_field.utils import is_aware
 from json_field.forms import JSONFormField
 
 from django.db import models
-from django.utils import simplejson as json
-from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 
