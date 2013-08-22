@@ -3,8 +3,12 @@ from __future__ import unicode_literals
 from json_field.utils import is_aware
 from json_field.forms import JSONFormField
 
+try:
+    import json
+except ImportError:  # python < 2.6
+    from django.utils import simplejson as json
+
 from django.db import models
-from django.utils import simplejson as json
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
