@@ -1,5 +1,7 @@
 from __future__ import unicode_literals, division
 
+import inspect
+
 from json_field.fields import JSON_DECODE_ERROR
 
 from test_project.app.models import Test
@@ -164,3 +166,20 @@ class JSONFieldTest(TestCase):
         self.assertFalse(f6.is_valid())
         f7 = ModelForm({'json':'{"time": datetime.datetime.now()}'})
         self.assertFalse(f7.is_valid())
+
+    def test_creator_plays_nice_with_module_inspect(self):
+        """
+        From upstream, based on:
+        https://code.djangoproject.com/ticket/12568
+        and corresponding patch:
+        https://code.djangoproject.com/changeset/50633e7353694ff54f14b04469be3792f286182f
+
+
+        Custom fields should play nice with python standard module inspect.
+
+        http://users.rcn.com/python/download/Descriptor.htm#properties
+        """
+        # The custom Creator's non property like behaviour made the properties
+        # invisible for inspection.
+        data = dict(inspect.getmembers(Test))
+        self.assertIn('json', data)

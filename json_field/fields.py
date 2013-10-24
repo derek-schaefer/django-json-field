@@ -109,7 +109,7 @@ class Creator(object):
 
     def __get__(self, obj, type=None):
         if obj is None:
-            raise AttributeError('Can only be accessed via an instance.')
+            return self
 
         if self.lazy:
             state = getattr(obj, self._state_key, None)
