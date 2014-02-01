@@ -9,27 +9,36 @@ except ImportError:  # python < 2.6
     from django.utils import simplejson as json
 
 from django.db import models
-from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ImproperlyConfigured
+from django.utils.dateparse import parse_date, parse_datetime
 
 import re
 import decimal
 import datetime
 import six
-try:
-    from dateutil import parser as date_parser
-except ImportError:
-    raise ImproperlyConfigured('The "dateutil" library is required and was not found.')
 
 try:
     JSON_DECODE_ERROR = json.JSONDecodeError # simplejson
 except AttributeError:
     JSON_DECODE_ERROR = ValueError # other
 
-TIME_RE = re.compile(r'^\d{2}:\d{2}:\d{2}')
-DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}(?!T)')
-DATETIME_RE = re.compile(r'^\d{4}-\d{2}-\d{2}T')
+
+# django pure implementation has missed trailing $ in time regex, so reimplement it
+time_re = re.compile(
+    r'(?P<hour>\d{1,2}):(?P<minute>\d{1,2})'
+    r'(?::(?P<second>\d{1,2})(?:\.(?P<microsecond>\d{1,6})\d{0,6})?)?$'
+)
+
+
+def parse_time(value):
+    match = time_re.match(value)
+    if match:
+        kw = match.groupdict()
+        if kw['microsecond']:
+            kw['microsecond'] = kw['microsecond'].ljust(6, '0')
+        kw = dict((k, int(v)) for k, v in six.iteritems(kw) if v is not None)
+        return datetime.time(**kw)
+
 
 class JSONEncoder(json.JSONEncoder):
     """
@@ -79,21 +88,12 @@ class JSONDecoder(json.JSONDecoder):
                 if self._is_recursive(value):
                     obj[key] = self.decode(value, recurse=True)
         elif isinstance(obj, six.string_types):
-            if TIME_RE.match(obj):
-                try:
-                    return date_parser.parse(obj).time()
-                except ValueError:
-                    pass
-            if DATE_RE.match(obj):
-                try:
-                    return date_parser.parse(obj).date()
-                except ValueError:
-                    pass
-            if DATETIME_RE.match(obj):
-                try:
-                    return date_parser.parse(obj)
-                except ValueError:
-                    pass
+            try:
+                dt = parse_time(obj) or parse_date(obj) or parse_datetime(obj)
+            except ValueError:
+                dt = None
+            if dt:
+                return dt
         return obj
 
 class Creator(object):
