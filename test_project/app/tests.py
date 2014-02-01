@@ -2,7 +2,7 @@ from __future__ import unicode_literals, division
 
 import inspect
 
-from json_field.fields import JSON_DECODE_ERROR
+from json_field.fields import JSONDecoder, JSON_DECODE_ERROR
 
 from test_project.app.models import Test
 from test_project.app.forms import TestForm, OptionalForm, \
@@ -183,3 +183,50 @@ class JSONFieldTest(TestCase):
         # invisible for inspection.
         data = dict(inspect.getmembers(Test))
         self.assertIn('json', data)
+
+    def test_decode_date(self):
+        decode = JSONDecoder().decode
+
+        # Valid inputs
+        self.assertEqual(decode('"2012-04-23"'), datetime.date(2012, 4, 23))
+        self.assertEqual(decode('"2012-4-9"'), datetime.date(2012, 4, 9))
+
+        # Invalid inputs
+        self.assertEqual(decode('"20120423"'), '20120423')
+        self.assertEqual(decode('"2012-04-56"'), '2012-04-56')
+
+        # Invalid formatting
+        self.assertEqual(decode('"2012-04-23 | Test"'), '2012-04-23 | Test')
+
+    def test_decode_time(self):
+        decode = JSONDecoder().decode
+
+        # Valid inputs
+        self.assertEqual(decode('"09:15:00"'), datetime.time(9, 15))
+        self.assertEqual(decode('"10:10"'), datetime.time(10, 10))
+        self.assertEqual(decode('"10:20:30.400"'), datetime.time(10, 20, 30, 400000))
+        self.assertEqual(decode('"4:8:16"'), datetime.time(4, 8, 16))
+
+        # Invalid inputs
+        self.assertEqual(decode('"091500"'), '091500')
+        self.assertEqual(decode('"09:15:90"'), '09:15:90')
+
+        # Invalid formatting
+        self.assertEqual(decode('"09:15:00 | Test"'), '09:15:00 | Test')
+
+    def test_decode_datetime(self):
+        decode = JSONDecoder().decode
+
+        # Valid inputs
+        self.assertEqual(decode('"2012-04-23T09:15:00"'),
+                         datetime.datetime(2012, 4, 23, 9, 15))
+        self.assertEqual(decode('"2012-4-9 4:8:16"'),
+                         datetime.datetime(2012, 4, 9, 4, 8, 16))
+
+        # Invalid inputs
+        self.assertEqual(decode('"20120423091500"'), '20120423091500')
+        self.assertEqual(decode('"2012-04-56T09:15:90"'), '2012-04-56T09:15:90')
+
+        # Invalid formatting
+        self.assertEqual(decode('"2012-04-23T09:15:00 | Test"'),
+                         '2012-04-23T09:15:00 | Test')
