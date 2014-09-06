@@ -10,7 +10,7 @@ from test_project.app.forms import TestForm, OptionalForm, \
 
 from django.test import TestCase
 from django.db.utils import IntegrityError
-from django.utils import simplejson as json
+import json
 
 import datetime
 from decimal import Decimal
