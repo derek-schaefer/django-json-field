@@ -27,13 +27,13 @@ try:
 except AttributeError:
     JSON_DECODE_ERROR = ValueError # other
 
-TIME_FMT = r'\d{2}:\d{2}:\d{2}(\.\d+)?'
+TIME_FMT = r'\d{2}:\d{2}:\d{2}(?:\.\d+)?'
 DATE_FMT = r'\d{4}-\d{2}-\d{2}'
-TIMEZONE_FMT = r'((\+|\-)\d{2}:\d{2}|Z)'
+TIMEZONE_FMT = r'(?:[+-]\d{2}:\d{2}|Z)'
 
-TIME_RE = re.compile(r'^(%s)$' % TIME_FMT)
-DATE_RE = re.compile(r'^(%s)$' % DATE_FMT)
-DATETIME_RE = re.compile(r'^(%s)T(%s)(%s)?$' % (DATE_FMT, TIME_FMT, TIMEZONE_FMT))
+TIME_RE = re.compile(r'^%s$' % TIME_FMT)
+DATE_RE = re.compile(r'^%s$' % DATE_FMT)
+DATETIME_RE = re.compile(r'^%sT%s(?:%s)?$' % (DATE_FMT, TIME_FMT, TIMEZONE_FMT))
 
 class JSONEncoder(json.JSONEncoder):
     """
