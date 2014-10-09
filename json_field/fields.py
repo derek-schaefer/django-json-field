@@ -9,7 +9,6 @@ except ImportError:  # python < 2.6
     from django.utils import simplejson as json
 
 from django.db import models
-from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
 
@@ -20,20 +19,23 @@ import six
 try:
     from dateutil import parser as date_parser
 except ImportError:
-    raise ImproperlyConfigured('The "dateutil" library is required and was not found.')
+    raise ImproperlyConfigured(
+        'The "dateutil" library is required and was not found.'
+    )
 
 try:
-    JSON_DECODE_ERROR = json.JSONDecodeError # simplejson
+    JSON_DECODE_ERROR = json.JSONDecodeError  # simplejson
 except AttributeError:
-    JSON_DECODE_ERROR = ValueError # other
+    JSON_DECODE_ERROR = ValueError  # other
 
 TIME_FMT = r'\d{2}:\d{2}:\d{2}(?:\.\d+)?'
 DATE_FMT = r'\d{4}-\d{2}-\d{2}'
-TIMEZONE_FMT = r'(?:[+-]\d{2}:\d{2}|Z)'
+TIMEZONE_FMT = r'(?:[+-]\d{2}:\d{2}|Z)?'
 
 TIME_RE = re.compile(r'^%s$' % TIME_FMT)
 DATE_RE = re.compile(r'^%s$' % DATE_FMT)
-DATETIME_RE = re.compile(r'^%sT%s(?:%s)?$' % (DATE_FMT, TIME_FMT, TIMEZONE_FMT))
+DATETIME_RE = re.compile(r'^%sT%s%s$' % (DATE_FMT, TIME_FMT, TIMEZONE_FMT))
+
 
 class JSONEncoder(json.JSONEncoder):
     """
@@ -61,6 +63,7 @@ class JSONEncoder(json.JSONEncoder):
             return str(o)
         else:
             return super(JSONEncoder, self).default(o)
+
 
 class JSONDecoder(json.JSONDecoder):
     """ Recursive JSON to Python deserialization. """
@@ -100,6 +103,7 @@ class JSONDecoder(json.JSONDecoder):
                     pass
         return obj
 
+
 class Creator(object):
     """
     Taken from django.db.models.fields.subclassing.
@@ -133,7 +137,11 @@ class Creator(object):
         return value
 
     def __set__(self, obj, value):
-        obj.__dict__[self.field.name] = value if self.lazy else self.field.to_python(value)
+        if self.lazy:
+            obj.__dict__[self.field.name] = value
+        else:
+            obj.__dict__[self.field.name] = self.field.to_python(value)
+
 
 class JSONField(models.TextField):
     """ Stores and loads valid JSON objects. """
@@ -153,14 +161,19 @@ class JSONField(models.TextField):
         encoder_kwargs = kwargs.pop('encoder_kwargs', {})
         decoder_kwargs = kwargs.pop('decoder_kwargs', {})
         if not encoder_kwargs and encoder:
-            encoder_kwargs.update({'cls':encoder})
+            encoder_kwargs.update({'cls': encoder})
         if not decoder_kwargs and decoder:
-            decoder_kwargs.update({'cls':decoder, 'parse_float':decimal.Decimal})
+            decoder_kwargs.update({
+                'cls': decoder,
+                'parse_float': decimal.Decimal,
+            })
         self.encoder_kwargs = encoder_kwargs
         self.decoder_kwargs = decoder_kwargs
 
         kwargs['default'] = kwargs.get('default', 'null')
-        kwargs['help_text'] = kwargs.get('help_text', self.default_error_messages['invalid'])
+        kwargs['help_text'] = kwargs.get(
+            'help_text', self.default_error_messages['invalid']
+        )
 
         super(JSONField, self).__init__(*args, **kwargs)
 
@@ -170,7 +183,7 @@ class JSONField(models.TextField):
         return super(JSONField, self).db_type(*args, **kwargs)
 
     def to_python(self, value):
-        if value is None: # allow blank objects
+        if value is None:  # allow blank objects
             return None
         if isinstance(value, six.string_types):
             try:
@@ -188,7 +201,8 @@ class JSONField(models.TextField):
         return self.get_db_prep_value(self._get_val_from_obj(obj))
 
     def value_from_object(self, obj):
-        return json.dumps(super(JSONField, self).value_from_object(obj), **self.encoder_kwargs)
+        return json.dumps(super(JSONField, self).value_from_object(obj),
+                          **self.encoder_kwargs)
 
     def formfield(self, **kwargs):
         defaults = {
@@ -204,14 +218,17 @@ class JSONField(models.TextField):
         super(JSONField, self).contribute_to_class(cls, name)
 
         def get_json(model_instance):
-            return self.get_db_prep_value(getattr(model_instance, self.attname, None), force=True)
+            return self.get_db_prep_value(
+                getattr(model_instance, self.attname, None), force=True
+            )
         setattr(cls, 'get_%s_json' % self.name, get_json)
 
         def set_json(model_instance, value):
             return setattr(model_instance, self.attname, self.to_python(value))
         setattr(cls, 'set_%s_json' % self.name, set_json)
 
-        setattr(cls, name, Creator(self, lazy=self.lazy)) # deferred deserialization
+        # deferred deserialization
+        setattr(cls, name, Creator(self, lazy=self.lazy))
 
 try:
     # add support for South migrations
