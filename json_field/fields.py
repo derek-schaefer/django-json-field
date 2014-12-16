@@ -33,7 +33,7 @@ TIMEZONE_FMT = r'(\+|\-)\d{2}:\d{2}'
 
 TIME_RE = re.compile(r'^(%s)$' % TIME_FMT)
 DATE_RE = re.compile(r'^(%s)$' % DATE_FMT)
-DATETIME_RE = re.compile(r'^(%s)T(%s)(%s)?$' % (DATE_FMT, TIME_FMT, TIMEZONE_FMT))
+DATETIME_RE = re.compile(r'^(%s)T(%s)(%s|Z)?$' % (DATE_FMT, TIME_FMT, TIMEZONE_FMT))
 
 class JSONEncoder(json.JSONEncoder):
     """
