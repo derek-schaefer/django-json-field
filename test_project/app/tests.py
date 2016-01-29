@@ -14,6 +14,8 @@ import json
 
 import datetime
 from decimal import Decimal
+from django.utils import timezone
+
 
 try:
     from django.utils import unittest
@@ -108,6 +110,16 @@ class JSONFieldTest(TestCase):
         self.assertEqual(now_rounded, Test.objects.get(pk=t1.pk).json)
         t2 = Test.objects.create(json={'test':[{'test':now}]})
         self.assertEqual({'test':[{'test':now_rounded}]}, Test.objects.get(pk=t2.pk).json)
+        # real timezone support
+        now = timezone.localtime(timezone.now(),timezone.pytz.timezone('Europe/Moscow'))
+        now_rounded = now.replace(microsecond=(int(now.microsecond) // 1000) * 1000)
+        t3 = Test.objects.create(json={'test':[{'test':now_rounded}]})
+        self.assertEqual(now_rounded, Test.objects.get(pk=t3.pk).json['test'][0]['test'])
+        # zero (UTC) timezone support
+        now = timezone.localtime(timezone.now(),timezone.utc)
+        now_rounded = now.replace(microsecond=(int(now.microsecond) // 1000) * 1000)
+        t4 = Test.objects.create(json={'test':[{'test':now_rounded}]})
+        self.assertEqual(now_rounded, Test.objects.get(pk=t4.pk).json['test'][0]['test'])
 
     def test_numerical_strings(self):
         t1 = Test.objects.create(json='"555"')
