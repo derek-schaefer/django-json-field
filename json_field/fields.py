@@ -9,6 +9,7 @@ except ImportError:  # python < 2.6
     from django.utils import simplejson as json
 
 from django.db import models
+from django.conf import settings
 from django.core import exceptions
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
@@ -26,6 +27,9 @@ try:
     JSON_DECODE_ERROR = json.JSONDecodeError # simplejson
 except AttributeError:
     JSON_DECODE_ERROR = ValueError # other
+
+
+JSON_FIELD_PARSE_FLOAT = getattr(settings, 'JSON_FIELD_PARSE_FLOAT', decimal.Decimal)
 
 TIME_FMT = r'\d{2}:\d{2}:\d{2}(\.\d+)?'
 DATE_FMT = r'\d{4}-\d{2}-\d{2}'
@@ -155,7 +159,7 @@ class JSONField(models.TextField):
         if not encoder_kwargs and encoder:
             encoder_kwargs.update({'cls':encoder})
         if not decoder_kwargs and decoder:
-            decoder_kwargs.update({'cls':decoder, 'parse_float':decimal.Decimal})
+            decoder_kwargs.update({'cls':decoder, 'parse_float': JSON_FIELD_PARSE_FLOAT})
         self.encoder_kwargs = encoder_kwargs
         self.decoder_kwargs = decoder_kwargs
 
