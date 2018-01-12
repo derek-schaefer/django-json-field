@@ -8,6 +8,7 @@ from json_field.forms import JSONFormField
 class ModelForm(forms.ModelForm):
     class Meta:
         model = Test
+        fields = '__all__'
 
 class TestForm(forms.Form):
     json = JSONFormField()
