@@ -4,6 +4,11 @@ import json
 from json_field.utils import is_aware
 from json_field.forms import JSONFormField
 
+try:
+    import json
+except ImportError:  # python < 2.6
+    from django.utils import simplejson as json
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
@@ -22,9 +27,13 @@ try:
 except AttributeError:
     JSON_DECODE_ERROR = ValueError # other
 
-TIME_RE = re.compile(r'^\d{2}:\d{2}:\d{2}')
-DATE_RE = re.compile(r'^\d{4}-\d{2}-\d{2}(?!T)')
-DATETIME_RE = re.compile(r'^\d{4}-\d{2}-\d{2}T')
+TIME_FMT = r'\d{2}:\d{2}:\d{2}(\.\d+)?'
+DATE_FMT = r'\d{4}-\d{2}-\d{2}'
+TIMEZONE_FMT = r'(\+|\-)\d{2}:\d{2}'
+
+TIME_RE = re.compile(r'^(%s)$' % TIME_FMT)
+DATE_RE = re.compile(r'^(%s)$' % DATE_FMT)
+DATETIME_RE = re.compile(r'^(%s)T(%s)(%s)?$' % (DATE_FMT, TIME_FMT, TIMEZONE_FMT))
 
 class JSONEncoder(json.JSONEncoder):
     """
@@ -104,7 +113,7 @@ class Creator(object):
 
     def __get__(self, obj, type=None):
         if obj is None:
-            raise AttributeError('Can only be accessed via an instance.')
+            return self
 
         if self.lazy:
             state = getattr(obj, self._state_key, None)

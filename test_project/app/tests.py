@@ -1,10 +1,22 @@
 from __future__ import unicode_literals, division
 
+<<<<<<< HEAD
+=======
+import inspect
+
+from json_field.fields import JSON_DECODE_ERROR
+
+>>>>>>> 780f03492f18a909a7c40e534481dd5a78538ee1
 from test_project.app.models import Test
 from test_project.app.forms import TestForm, OptionalForm, \
     EvalForm, ModelForm
 
 from django.test import TestCase
+<<<<<<< HEAD
+=======
+from django.db.utils import IntegrityError
+import json
+>>>>>>> 780f03492f18a909a7c40e534481dd5a78538ee1
 
 import datetime
 from decimal import Decimal
@@ -105,6 +117,16 @@ class JSONFieldTest(TestCase):
         t2 = Test.objects.create(json='"123.98712634789162349781264"')
         self.assertEqual('123.98712634789162349781264', Test.objects.get(pk=t2.pk).json)
 
+    def test_datelike_strings(self):
+        t1 = Test.objects.create(json='{"title": "2014-01-27 | Title with date"}')
+        self.assertEqual({'title': '2014-01-27 | Title with date'}, Test.objects.get(pk=t1.pk).json)
+        t2 = Test.objects.create(json='{"title": "10:42:07 | Title with date"}')
+        self.assertEqual({'title': '10:42:07 | Title with date'}, Test.objects.get(pk=t2.pk).json)
+        t3 = Test.objects.create(json='{"title": "10:42:07.123 | Title with date"}')
+        self.assertEqual({'title': '10:42:07.123 | Title with date'}, Test.objects.get(pk=t3.pk).json)
+        t4 = Test.objects.create(json='{"title": "2014-05-07T12:34:56 | Title with date"}')
+        self.assertEqual({'title': '2014-05-07T12:34:56 | Title with date'}, Test.objects.get(pk=t4.pk).json)
+
     def test_get_set_json(self):
         t1 = Test.objects.create(json={'test':123})
         self.assertEqual({'test':123}, t1.json)
@@ -156,3 +178,20 @@ class JSONFieldTest(TestCase):
         self.assertFalse(f6.is_valid())
         f7 = ModelForm({'json':'{"time": datetime.datetime.now()}'})
         self.assertFalse(f7.is_valid())
+
+    def test_creator_plays_nice_with_module_inspect(self):
+        """
+        From upstream, based on:
+        https://code.djangoproject.com/ticket/12568
+        and corresponding patch:
+        https://code.djangoproject.com/changeset/50633e7353694ff54f14b04469be3792f286182f
+
+
+        Custom fields should play nice with python standard module inspect.
+
+        http://users.rcn.com/python/download/Descriptor.htm#properties
+        """
+        # The custom Creator's non property like behaviour made the properties
+        # invisible for inspection.
+        data = dict(inspect.getmembers(Test))
+        self.assertIn('json', data)

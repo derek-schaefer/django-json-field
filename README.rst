@@ -1,6 +1,8 @@
 Django JSON Field
 =================
 
+**NOTE: This project is seeking new active maintainers.**
+
 ``django-json-field`` contains a flexible JSONField and associated form field. The model field is not only capable of serializing common JSON data types (int, float, decimal, string, time, date, datetime, etc.) but also lazily deserializing them so they can be accessed and modified as normal Python objects within Django.
 
 A form field is also provided. It will accept serialized representations:
